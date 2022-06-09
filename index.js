@@ -13,16 +13,15 @@ app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.post('/', (req, res) => {
+app.get('/', (req, res) => {
 	try {
 		//CHECK TO SEE IF WE HAVE THE STUFF
-		const { fileUrl, printer, parts } = req.body;
-		if (!fileUrl || !printer || !parts)
-			return res.status(400).json({ err: 'Missing fileUrl or printer' });
+		const { fileUrl, printer } = req.query;
+		if (!fileUrl || !printer) return res.status(400).json({ err: 'Missing fileUrl or printer' });
 
 		const file = fs.createWriteStream(`./tmp/${uuidv4()}.pdf`);
 
-		axios.post(fileUrl, { parts }, { responseType: 'stream' }).then((response) => {
+		axios.get(fileUrl, { responseType: 'stream' }).then((response) => {
 			response.data.pipe(file);
 			file.on('finish', () => {
 				file.close();
